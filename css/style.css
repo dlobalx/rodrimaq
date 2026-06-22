@@ -764,12 +764,14 @@ section {
     .hero-buttons {
         flex-direction: column;
         gap: 0.8rem;
+        align-items: center;
     }
 
     .btn {
         width: 100%;
         max-width: 300px;
         padding: 12px 30px;
+        text-align: center;
     }
 
     section {
@@ -893,6 +895,11 @@ section {
     .btn {
         padding: 10px 25px;
         font-size: 0.95rem;
+    }
+
+    .hero-buttons {
+        align-items: center;
+        width: 100%;
     }
 
     section {
