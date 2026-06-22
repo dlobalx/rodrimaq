@@ -1,0 +1,26 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffa500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="800" height="600" fill="url(#grad1)"/>
+  
+  <text x="400" y="280" font-family="Arial, sans-serif" font-size="48" fill="white" text-anchor="middle" font-weight="bold">
+    TransMaq
+  </text>
+  
+  <text x="400" y="330" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" opacity="0.9">
+    Transporte de Máquinas
+  </text>
+  
+  <g transform="translate(350, 350)">
+    <path d="M 0 0 L 100 0 L 100 40 L 80 40 L 80 60 L 20 60 L 20 40 L 0 40 Z" fill="white" opacity="0.3"/>
+    <circle cx="25" cy="60" r="8" fill="white" opacity="0.5"/>
+    <circle cx="75" cy="60" r="8" fill="white" opacity="0.5"/>
+  </g>
+</svg>
+
+<!-- Made with Bob -->
