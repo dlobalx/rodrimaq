@@ -1,9 +1,32 @@
+// Detectar se é dispositivo móvel
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// Prevenir zoom duplo-toque em iOS
+if (isMobile) {
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
+}
+
 // Menu Mobile Toggle
 const menuToggle = document.getElementById('menuToggle');
 const navMenu = document.getElementById('navMenu');
 
 menuToggle.addEventListener('click', () => {
     navMenu.classList.toggle('active');
+    
+    // Prevenir scroll do body quando menu está aberto
+    if (navMenu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
     
     // Animação do botão hamburguer
     const spans = menuToggle.querySelectorAll('span');
@@ -23,6 +46,7 @@ const navLinks = document.querySelectorAll('.nav-menu a');
 navLinks.forEach(link => {
     link.addEventListener('click', () => {
         navMenu.classList.remove('active');
+        document.body.style.overflow = '';
         const spans = menuToggle.querySelectorAll('span');
         spans[0].style.transform = 'none';
         spans[1].style.opacity = '1';
@@ -334,3 +358,200 @@ console.log('%c🚚 TransMaq Website Loaded Successfully!', 'color: #ff6b00; fon
 console.log('%cDesenvolvido com ❤️ para transporte de máquinas', 'color: #666; font-size: 12px;');
 
 // Made with Bob
+
+
+// ===== OTIMIZAÇÕES MOBILE =====
+
+// Fechar menu ao clicar fora dele
+document.addEventListener('click', (e) => {
+    if (navMenu.classList.contains('active') && 
+        !navMenu.contains(e.target) && 
+        !menuToggle.contains(e.target)) {
+        navMenu.classList.remove('active');
+        document.body.style.overflow = '';
+        const spans = menuToggle.querySelectorAll('span');
+        spans[0].style.transform = 'none';
+        spans[1].style.opacity = '1';
+        spans[2].style.transform = 'none';
+    }
+});
+
+// Otimizar scroll em dispositivos móveis
+let ticking = false;
+let lastScrollY = window.scrollY;
+
+window.addEventListener('scroll', () => {
+    lastScrollY = window.scrollY;
+    
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            handleScroll(lastScrollY);
+            ticking = false;
+        });
+        ticking = true;
+    }
+});
+
+function handleScroll(scrollY) {
+    // Destacar link ativo no menu
+    let current = '';
+    const sections = document.querySelectorAll('section');
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        if (scrollY >= (sectionTop - 100)) {
+            current = section.getAttribute('id');
+        }
+    });
+
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+        }
+    });
+
+    // Adicionar sombra ao header no scroll
+    const header = document.querySelector('.header');
+    if (scrollY > 100) {
+        header.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.15)';
+    } else {
+        header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+    }
+}
+
+// Melhorar performance de animações em mobile
+if (isMobile) {
+    // Reduzir animações em dispositivos móveis para melhor performance
+    const style = document.createElement('style');
+    style.textContent = `
+        @media (max-width: 768px) {
+            * {
+                animation-duration: 0.3s !important;
+                transition-duration: 0.2s !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Otimizar imagens para mobile (lazy loading nativo)
+if ('loading' in HTMLImageElement.prototype) {
+    const images = document.querySelectorAll('img[data-src]');
+    images.forEach(img => {
+        img.src = img.dataset.src;
+        img.removeAttribute('data-src');
+    });
+} else {
+    // Fallback para navegadores antigos
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+    document.body.appendChild(script);
+}
+
+// Detectar orientação do dispositivo
+let currentOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+
+window.addEventListener('resize', () => {
+    const newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+    
+    if (newOrientation !== currentOrientation) {
+        currentOrientation = newOrientation;
+        
+        // Fechar menu ao mudar orientação
+        if (navMenu.classList.contains('active')) {
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+            const spans = menuToggle.querySelectorAll('span');
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        }
+    }
+});
+
+// Melhorar experiência de toque
+if (isTouch) {
+    // Adicionar classe para dispositivos touch
+    document.body.classList.add('touch-device');
+    
+    // Melhorar feedback visual em botões
+    const touchElements = document.querySelectorAll('.btn, .service-card, .project-card, .whatsapp-float');
+    
+    touchElements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.opacity = '0.8';
+        }, { passive: true });
+        
+        element.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.opacity = '1';
+            }, 100);
+        }, { passive: true });
+    });
+}
+
+// Otimizar formulário para mobile
+const formInputs = document.querySelectorAll('input, textarea, select');
+formInputs.forEach(input => {
+    // Prevenir zoom em iOS ao focar em inputs
+    if (isMobile) {
+        input.addEventListener('focus', () => {
+            const viewport = document.querySelector('meta[name=viewport]');
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        });
+        
+        input.addEventListener('blur', () => {
+            const viewport = document.querySelector('meta[name=viewport]');
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes');
+        });
+    }
+});
+
+// Adicionar suporte a swipe para fechar menu mobile
+let touchStartX = 0;
+let touchEndX = 0;
+
+navMenu.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+navMenu.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+    // Swipe para esquerda fecha o menu
+    if (touchStartX - touchEndX > 50) {
+        if (navMenu.classList.contains('active')) {
+            navMenu.classList.remove('active');
+            document.body.style.overflow = '';
+            const spans = menuToggle.querySelectorAll('span');
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        }
+    }
+}
+
+// Melhorar performance do WhatsApp button em mobile
+const whatsappButton = document.querySelector('.whatsapp-float');
+if (whatsappButton && isMobile) {
+    whatsappButton.addEventListener('click', (e) => {
+        // Adicionar feedback visual
+        whatsappButton.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            whatsappButton.style.transform = 'scale(1)';
+        }, 100);
+    });
+}
+
+// Log de inicialização mobile
+if (isMobile) {
+    console.log('%c📱 Mobile Mode Activated', 'color: #ff6b00; font-size: 14px; font-weight: bold;');
+    console.log(`Device: ${navigator.userAgent}`);
+    console.log(`Screen: ${window.innerWidth}x${window.innerHeight}`);
+    console.log(`Touch Support: ${isTouch ? 'Yes' : 'No'}`);
+}
